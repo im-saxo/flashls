@@ -95,6 +95,8 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("getseekFromLowestLevel", _getseekFromLevel);
             ExternalInterface.addCallback("getCapLevelToWidth", _getCapLevelToWidth);
             ExternalInterface.addCallback("getCapLevelToHeight", _getCapLevelToHeight);
+            ExternalInterface.addCallback("getCapStartLevelToWidth", _getCapStartLevelToWidth);
+            ExternalInterface.addCallback("getCapStartLevelToHeight", _getCapStartLevelToHeight);
             ExternalInterface.addCallback("getJSURLStream", _getJSURLStream);
             ExternalInterface.addCallback("getPlayerVersion", _getPlayerVersion);
             ExternalInterface.addCallback("getAudioTrackList", _getAudioTrackList);
@@ -121,6 +123,8 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerSetseekFromLevel", _setseekFromLevel);
             ExternalInterface.addCallback("playerSetCapLevelToWidth", _setCapLevelToWidth);
             ExternalInterface.addCallback("playerSetCapLevelToHeight", _setCapLevelToHeight);
+            ExternalInterface.addCallback("playerSetCapStartLevelToWidth", _setCapStartLevelToWidth);
+            ExternalInterface.addCallback("playerSetCapStartLevelToHeight", _setCapStartLevelToHeight);
             ExternalInterface.addCallback("playerSetLogDebug", _setLogDebug);
             ExternalInterface.addCallback("playerSetLogDebug2", _setLogDebug2);
             ExternalInterface.addCallback("playerSetUseHardwareVideoDecoder", _setUseHardwareVideoDecoder);
@@ -154,7 +158,9 @@ package org.mangui.chromeless {
         }
 
         protected function _trigger(event : String, ...args) : void {
-            if (ExternalInterface.available) {
+            // to avoid XSS through query parameters (ex. flash.swf?callback=function(){alert(1);} )
+            // set callback mask to something like window.123abc___callback
+            if (ExternalInterface.available && /^window.([0-9a-z]*)___callback$/.test(_callbackName)) {
                 ExternalInterface.call(_callbackName, event, args);
             }
         };
@@ -348,6 +354,14 @@ package org.mangui.chromeless {
             return HLSSettings.capLevelToHeight;
         };
 
+        protected function _getCapStartLevelToWidth() : Number {
+            return HLSSettings.capStartLevelToWidth;
+        };
+
+        protected function _getCapStartLevelToHeight() : Number {
+            return HLSSettings.capStartLevelToHeight;
+        };
+
         protected function _getJSURLStream() : Boolean {
             return (_hls.URLstream is JSURLStream);
         };
@@ -464,6 +478,14 @@ package org.mangui.chromeless {
 
         protected function _setCapLevelToHeight(value : Number) : void {
             HLSSettings.capLevelToHeight = value;
+        };
+
+        protected function _setCapStartLevelToWidth(value : Number) : void {
+            HLSSettings.capStartLevelToWidth = value;
+        };
+
+        protected function _setCapStartLevelToHeight(value : Number) : void {
+            HLSSettings.capStartLevelToHeight = value;
         };
 
         protected function _setJSURLStream(jsURLstream : Boolean) : void {

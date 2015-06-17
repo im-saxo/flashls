@@ -116,7 +116,7 @@ package org.mangui.hls.controller {
         ;
 
         public function getbestlevel(downloadBandwidth : Number) : int {
-            var max_level : int = _maxLevel;
+            var max_level : int = _getMaxLevel();
             for (var i : int = max_level; i >= 0; i--) {
                 if (_bitrate[i] <= downloadBandwidth) {
                     return i;
@@ -154,11 +154,27 @@ package org.mangui.hls.controller {
             _autoLevelCapping = newLevel;
         }
 
-        private function get _maxLevel() : int {
+        /**
+        * If custom level capping size is set, return it.
+        */
+        private function getLevelSizeCapping (isStart : Boolean = false) : Object {
+            var result:Object = null;
+            if (isStart && (HLSSettings.capStartLevelToWidth || HLSSettings.capStartLevelToHeight)) {
+                result = { width: HLSSettings.capStartLevelToWidth, height: HLSSettings.capStartLevelToHeight };
+            }
+            else if (HLSSettings.capLevelToWidth || HLSSettings.capLevelToHeight) {
+                result = { width: HLSSettings.capLevelToWidth, height: HLSSettings.capLevelToHeight };
+            }
+
+            return result;
+        }
+
+        private function _getMaxLevel(isStart : Boolean = false) : int {
+            var cappingSize:Object;
             // if set, _autoLevelCapping takes precedence
             if(_autoLevelCapping >= 0) {
                 return Math.min(_nbLevel - 1, _autoLevelCapping);
-            } else if (HLSSettings.capLevelToStage || HLSSettings.capLevelToWidth || HLSSettings.capLevelToHeight) {
+            } else if (HLSSettings.capLevelToStage || (cappingSize = getLevelSizeCapping(isStart))) {
                 if (!_maxUniqueLevels) {
                     _maxUniqueLevels = _maxLevelsWithUniqueDimensions;
                 }
@@ -166,8 +182,8 @@ package org.mangui.hls.controller {
 
                 if (_hls.stage && maxLevelsCount) {
                     var maxLevel : Level = this._maxUniqueLevels[0], maxLevelIdx : int = maxLevel.index,
-                        sWidth : Number = HLSSettings.capLevelToWidth || this._hls.stage.stageWidth,
-                        sHeight : Number = HLSSettings.capLevelToHeight || this._hls.stage.stageHeight,
+                        sWidth : Number = (cappingSize && cappingSize.width) ? cappingSize.width : this._hls.stage.stageWidth,
+                        sHeight : Number = (cappingSize && cappingSize.height) ? cappingSize.height : this._hls.stage.stageHeight,
                         lWidth : int, lHeight : int, i : int;
 
                     switch (HLSSettings.maxLevelCappingMode) {
@@ -226,7 +242,7 @@ package org.mangui.hls.controller {
             TBMT is the buffer size we need to ensure (we need at least 2 segments buffered */
             var rsft : Number = 1000 * buffer - 2 * _lastFetchDuration;
             var sftm : Number = Math.min(_lastSegmentDuration, rsft) / _lastFetchDuration;
-            var max_level : Number = _maxLevel;
+            var max_level : Number = _getMaxLevel();
             var switch_to_level : int = current_level;
             // CONFIG::LOGGING {
             // Log.info("rsft:" + rsft);
@@ -335,9 +351,9 @@ package org.mangui.hls.controller {
                             // adjust start level using a rule by 3
                             start_level += Math.round(HLSSettings.startFromLevel * (levels.length - start_level - 1));
 
-                            if (HLSSettings.capLevelToWidth || HLSSettings.capLevelToHeight) {
+                            if (HLSSettings.capStartLevelToWidth || HLSSettings.capStartLevelToHeight) {
                                 // adjust start level with max level
-                                var maxLevel:int = _maxLevel;
+                                var maxLevel:int = _getMaxLevel(true);
                                 if (maxLevel > -1) {
                                     start_level = Math.min(start_level, maxLevel);
                                 }

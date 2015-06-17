@@ -32,7 +32,7 @@ package org.mangui.hls {
         public static var maxLevelCappingMode : String = HLSMaxLevelCappingMode.DOWNSCALE;
 
         /**
-        * capLevelWidth
+        * capLevelToWidth
         * 
         * Limit levels usable in auto-quality by given width.
         * Zero value means no capping
@@ -42,7 +42,7 @@ package org.mangui.hls {
         public static var capLevelToWidth : Number = 0;
 
         /**
-         * capLevelHeight
+         * capLevelToHeight
          * 
          * Limit levels usable in auto-quality by given height.
          * Zero value means no capping
@@ -50,6 +50,28 @@ package org.mangui.hls {
          * Default is 0;
          */ 
         public static var capLevelToHeight : Number = 0;
+
+        /**
+         * capStartLevelToWidth
+         * 
+         * Limit levels usable in auto-quality by given width only on start.
+         * Next segments are not capped.
+         * Zero value means no capping
+         * 
+         * Default is 0;
+         */ 
+        public static var capStartLevelToWidth : Number = 0;
+
+        /**
+         * capStartLevelToHeight
+         * 
+         * Limit levels usable in auto-quality by given height only on start.
+         * Next segments are not capped.
+         * Zero value means no capping
+         * 
+         * Default is 0;
+         */ 
+        public static var capStartLevelToHeight : Number = 0;
 
         // // // // // // /////////////////////////////////
         //
