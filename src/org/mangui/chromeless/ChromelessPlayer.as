@@ -132,6 +132,8 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerCapLeveltoStage", _setCapLeveltoStage);
             ExternalInterface.addCallback("playerSetAudioTrack", _setAudioTrack);
             ExternalInterface.addCallback("playerSetJSURLStream", _setJSURLStream);
+            ExternalInterface.addCallback("playerSetManifestLoadMaxRetry ", _setManifestLoadMaxRetry);
+            ExternalInterface.addCallback("playerSetFragmentLoadMaxRetry", _setFragmentLoadMaxRetry);
         };
 
         protected function _setupExternalCallback() : void {
@@ -486,6 +488,14 @@ package org.mangui.chromeless {
 
         protected function _setCapStartLevelToHeight(value : Number) : void {
             HLSSettings.capStartLevelToHeight = value;
+        };
+
+        protected function _setManifestLoadMaxRetry(value : int) : void {
+            HLSSettings.manifestLoadMaxRetry = value;
+        };
+
+        protected function _setFragmentLoadMaxRetry(value : int) : void {
+            HLSSettings.fragmentLoadMaxRetry = value;
         };
 
         protected function _setJSURLStream(jsURLstream : Boolean) : void {
