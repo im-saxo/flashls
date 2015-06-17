@@ -15,10 +15,11 @@ package org.mangui.chromeless {
     import flash.system.Security;
     import flash.utils.getTimer;
     import flash.utils.setTimeout;
-    import org.mangui.hls.event.HLSError;
-    import org.mangui.hls.event.HLSEvent;
+
     import org.mangui.hls.HLS;
     import org.mangui.hls.HLSSettings;
+    import org.mangui.hls.event.HLSError;
+    import org.mangui.hls.event.HLSEvent;
     import org.mangui.hls.model.AudioTrack;
     import org.mangui.hls.model.Level;
     import org.mangui.hls.utils.JSURLLoader;
@@ -59,6 +60,12 @@ package org.mangui.chromeless {
             _setupExternalCallback();
 
             setTimeout(_pingJavascript, 50);
+
+            CONFIG::LOGGING {
+                loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, function (event:UncaughtErrorEvent):void {
+                    Log.debug("UNCAUGHT ERROR :" + event.error);
+                });
+            }
         };
 
         protected function _setupExternalGetters() : void {
@@ -86,6 +93,8 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("getflushLiveURLCache", _getflushLiveURLCache);
             ExternalInterface.addCallback("getstartFromLevel", _getstartFromLevel);
             ExternalInterface.addCallback("getseekFromLowestLevel", _getseekFromLevel);
+            ExternalInterface.addCallback("getCapLevelToWidth", _getCapLevelToWidth);
+            ExternalInterface.addCallback("getCapLevelToHeight", _getCapLevelToHeight);
             ExternalInterface.addCallback("getJSURLStream", _getJSURLStream);
             ExternalInterface.addCallback("getPlayerVersion", _getPlayerVersion);
             ExternalInterface.addCallback("getAudioTrackList", _getAudioTrackList);
@@ -110,6 +119,8 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerSetflushLiveURLCache", _setflushLiveURLCache);
             ExternalInterface.addCallback("playerSetstartFromLevel", _setstartFromLevel);
             ExternalInterface.addCallback("playerSetseekFromLevel", _setseekFromLevel);
+            ExternalInterface.addCallback("playerSetCapLevelToWidth", _setCapLevelToWidth);
+            ExternalInterface.addCallback("playerSetCapLevelToHeight", _setCapLevelToHeight);
             ExternalInterface.addCallback("playerSetLogDebug", _setLogDebug);
             ExternalInterface.addCallback("playerSetLogDebug2", _setLogDebug2);
             ExternalInterface.addCallback("playerSetUseHardwareVideoDecoder", _setUseHardwareVideoDecoder);
@@ -329,6 +340,14 @@ package org.mangui.chromeless {
             return _hls.autoLevelCapping;
         };
 
+        protected function _getCapLevelToWidth() : Number {
+            return HLSSettings.capLevelToWidth;
+        };
+
+        protected function _getCapLevelToHeight() : Number {
+            return HLSSettings.capLevelToHeight;
+        };
+
         protected function _getJSURLStream() : Boolean {
             return (_hls.URLstream is JSURLStream);
         };
@@ -437,6 +456,14 @@ package org.mangui.chromeless {
 
         protected function _setAutoLevelCapping(value : int) : void {
             _hls.autoLevelCapping = value;
+        };
+
+        protected function _setCapLevelToWidth(value : Number) : void {
+            HLSSettings.capLevelToWidth = value;
+        };
+
+        protected function _setCapLevelToHeight(value : Number) : void {
+            HLSSettings.capLevelToHeight = value;
         };
 
         protected function _setJSURLStream(jsURLstream : Boolean) : void {

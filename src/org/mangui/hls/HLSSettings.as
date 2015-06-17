@@ -31,6 +31,26 @@ package org.mangui.hls {
          */
         public static var maxLevelCappingMode : String = HLSMaxLevelCappingMode.DOWNSCALE;
 
+        /**
+        * capLevelWidth
+        * 
+        * Limit levels usable in auto-quality by given width.
+        * Zero value means no capping
+        * 
+        * Default is 0;
+        */ 
+        public static var capLevelToWidth : Number = 0;
+
+        /**
+         * capLevelHeight
+         * 
+         * Limit levels usable in auto-quality by given height.
+         * Zero value means no capping
+         * 
+         * Default is 0;
+         */ 
+        public static var capLevelToHeight : Number = 0;
+
         // // // // // // /////////////////////////////////
         //
         // org.mangui.hls.stream.HLSNetStream

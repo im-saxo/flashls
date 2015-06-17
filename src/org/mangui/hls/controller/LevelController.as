@@ -2,12 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package org.mangui.hls.controller {
+    import org.mangui.hls.HLS;
+    import org.mangui.hls.HLSSettings;
     import org.mangui.hls.constant.HLSLoaderTypes;
     import org.mangui.hls.constant.HLSMaxLevelCappingMode;
     import org.mangui.hls.event.HLSEvent;
     import org.mangui.hls.event.HLSLoadMetrics;
-    import org.mangui.hls.HLS;
-    import org.mangui.hls.HLSSettings;
     import org.mangui.hls.model.Level;
 
     CONFIG::LOGGING {
@@ -109,7 +109,7 @@ package org.mangui.hls.controller {
                 }
             }
 
-            if (HLSSettings.capLevelToStage) {
+            if (HLSSettings.capLevelToStage || HLSSettings.capLevelToWidth || HLSSettings.capLevelToHeight) {
                 _maxUniqueLevels = _maxLevelsWithUniqueDimensions;
             }
         }
@@ -158,11 +158,17 @@ package org.mangui.hls.controller {
             // if set, _autoLevelCapping takes precedence
             if(_autoLevelCapping >= 0) {
                 return Math.min(_nbLevel - 1, _autoLevelCapping);
-            } else if (HLSSettings.capLevelToStage) {
+            } else if (HLSSettings.capLevelToStage || HLSSettings.capLevelToWidth || HLSSettings.capLevelToHeight) {
+                if (!_maxUniqueLevels) {
+                    _maxUniqueLevels = _maxLevelsWithUniqueDimensions;
+                }
                 var maxLevelsCount : int = _maxUniqueLevels.length;
 
                 if (_hls.stage && maxLevelsCount) {
-                    var maxLevel : Level = this._maxUniqueLevels[0], maxLevelIdx : int = maxLevel.index, sWidth : Number = this._hls.stage.stageWidth, sHeight : Number = this._hls.stage.stageHeight, lWidth : int, lHeight : int, i : int;
+                    var maxLevel : Level = this._maxUniqueLevels[0], maxLevelIdx : int = maxLevel.index,
+                        sWidth : Number = HLSSettings.capLevelToWidth || this._hls.stage.stageWidth,
+                        sHeight : Number = HLSSettings.capLevelToHeight || this._hls.stage.stageHeight,
+                        lWidth : int, lHeight : int, i : int;
 
                     switch (HLSSettings.maxLevelCappingMode) {
                         case HLSMaxLevelCappingMode.UPSCALE:
@@ -328,6 +334,14 @@ package org.mangui.hls.controller {
                         } else if (HLSSettings.startFromLevel > 0) {
                             // adjust start level using a rule by 3
                             start_level += Math.round(HLSSettings.startFromLevel * (levels.length - start_level - 1));
+
+                            if (HLSSettings.capLevelToWidth || HLSSettings.capLevelToHeight) {
+                                // adjust start level with max level
+                                var maxLevel:int = _maxLevel;
+                                if (maxLevel > -1) {
+                                    start_level = Math.min(start_level, maxLevel);
+                                }
+                            }
                         }
                     }
                 }
