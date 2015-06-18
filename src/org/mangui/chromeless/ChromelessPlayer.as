@@ -162,7 +162,7 @@ package org.mangui.chromeless {
         protected function _trigger(event : String, ...args) : void {
             // to avoid XSS through query parameters (ex. flash.swf?callback=function(){alert(1);} )
             // set callback mask to something like window.123abc___callback
-            if (ExternalInterface.available && /^window.([0-9a-z]*)___callback$/.test(_callbackName)) {
+            if (ExternalInterface.available && /^window.([0-9A-Za-z]*)___callback$/.test(_callbackName)) {
                 ExternalInterface.call(_callbackName, event, args);
             }
         };
