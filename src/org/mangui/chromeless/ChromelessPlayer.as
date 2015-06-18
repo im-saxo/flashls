@@ -101,6 +101,8 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("getPlayerVersion", _getPlayerVersion);
             ExternalInterface.addCallback("getAudioTrackList", _getAudioTrackList);
             ExternalInterface.addCallback("getAudioTrackId", _getAudioTrackId);
+            ExternalInterface.addCallback("getManifestLoadMaxRetry", _getManifestLoadMaxRetry);
+            ExternalInterface.addCallback("getFragmentLoadMaxRetry", _getFragmentLoadMaxRetry);
         };
 
         protected function _setupExternalCallers() : void {
@@ -132,7 +134,7 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerCapLeveltoStage", _setCapLeveltoStage);
             ExternalInterface.addCallback("playerSetAudioTrack", _setAudioTrack);
             ExternalInterface.addCallback("playerSetJSURLStream", _setJSURLStream);
-            ExternalInterface.addCallback("playerSetManifestLoadMaxRetry ", _setManifestLoadMaxRetry);
+            ExternalInterface.addCallback("playerSetManifestLoadMaxRetry", _setManifestLoadMaxRetry);
             ExternalInterface.addCallback("playerSetFragmentLoadMaxRetry", _setFragmentLoadMaxRetry);
         };
 
@@ -362,6 +364,14 @@ package org.mangui.chromeless {
 
         protected function _getCapStartLevelToHeight() : Number {
             return HLSSettings.capStartLevelToHeight;
+        };
+
+        protected function _getManifestLoadMaxRetry() : Number {
+            return HLSSettings.manifestLoadMaxRetry;
+        };
+
+        protected function _getFragmentLoadMaxRetry() : Number {
+            return HLSSettings.fragmentLoadMaxRetry;
         };
 
         protected function _getJSURLStream() : Boolean {
