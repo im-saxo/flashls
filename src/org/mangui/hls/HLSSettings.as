@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package org.mangui.hls {
-    import org.mangui.hls.constant.HLSSeekMode;
     import org.mangui.hls.constant.HLSMaxLevelCappingMode;
+    import org.mangui.hls.constant.HLSSeekMode;
 
     public final class HLSSettings extends Object {
         /**
@@ -246,6 +246,15 @@ package org.mangui.hls {
          * Default is -1
          */
         public static var seekFromLevel : Number = -1;
+
+        /**
+         * seekFromCurrentLevel
+         * 
+         * Seek from current level, ignore seekFromLevel setting and automatic start level selection.
+         * 
+         * Default is false
+         */ 
+        public static var seekFromCurrentLevel: Boolean = false;
 
         /**
          * useHardwareVideoDecoder

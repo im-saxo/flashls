@@ -93,6 +93,7 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("getflushLiveURLCache", _getflushLiveURLCache);
             ExternalInterface.addCallback("getstartFromLevel", _getstartFromLevel);
             ExternalInterface.addCallback("getseekFromLowestLevel", _getseekFromLevel);
+            ExternalInterface.addCallback("getseekFromCurrentLevel", _getseekFromCurrentLevel);
             ExternalInterface.addCallback("getCapLevelToWidth", _getCapLevelToWidth);
             ExternalInterface.addCallback("getCapLevelToHeight", _getCapLevelToHeight);
             ExternalInterface.addCallback("getCapStartLevelToWidth", _getCapStartLevelToWidth);
@@ -123,6 +124,7 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerSetflushLiveURLCache", _setflushLiveURLCache);
             ExternalInterface.addCallback("playerSetstartFromLevel", _setstartFromLevel);
             ExternalInterface.addCallback("playerSetseekFromLevel", _setseekFromLevel);
+            ExternalInterface.addCallback("playerSetseekFromCurrentLevel", _setseekFromCurrentLevel);
             ExternalInterface.addCallback("playerSetCapLevelToWidth", _setCapLevelToWidth);
             ExternalInterface.addCallback("playerSetCapLevelToHeight", _setCapLevelToHeight);
             ExternalInterface.addCallback("playerSetCapStartLevelToWidth", _setCapStartLevelToWidth);
@@ -330,6 +332,10 @@ package org.mangui.chromeless {
             return HLSSettings.seekFromLevel;
         };
 
+        protected function _getseekFromCurrentLevel() : Boolean {
+            return HLSSettings.seekFromCurrentLevel;
+        };
+
         protected function _getLogDebug() : Boolean {
             return HLSSettings.logDebug;
         };
@@ -462,6 +468,10 @@ package org.mangui.chromeless {
 
         protected function _setseekFromLevel(seekFromLevel : int) : void {
             HLSSettings.seekFromLevel = seekFromLevel;
+        };
+
+        protected function _setseekFromCurrentLevel(seekFromCurrentLevel : Boolean) : void {
+            HLSSettings.seekFromCurrentLevel = seekFromCurrentLevel;
         };
 
         protected function _setLogDebug(debug : Boolean) : void {

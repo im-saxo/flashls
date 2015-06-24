@@ -393,6 +393,11 @@ package org.mangui.hls.controller {
         public function get seekLevel() : int {
             var seek_level : int = -1;
             var levels : Vector.<Level> = _hls.levels;
+            if (HLSSettings.seekFromCurrentLevel) {
+                // keep current level
+                return _hls.currentLevel;
+            }
+
             if (HLSSettings.seekFromLevel == -1) {
                 // keep last level
                 return _hls.loadLevel;
