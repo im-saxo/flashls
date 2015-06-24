@@ -36,6 +36,7 @@ package org.mangui.hls.controller {
         private var  lastBandwidth : Number;
         private var  _autoLevelCapping : int = -1;
         private var  _startLevel : int = -1;
+        private var _skipAutoLevel : int = 0;
 
         /** Create the loader. **/
         public function LevelController(hls : HLS) : void {
@@ -233,6 +234,10 @@ package org.mangui.hls.controller {
             if (_lastFetchDuration == 0 || _lastSegmentDuration == 0) {
                 return 0;
             }
+            if (_skipAutoLevel > 0) {
+                _skipAutoLevel--;
+                return current_level;
+            }
 
             /* rsft : remaining segment fetch time : available time to fetch next segment
             it depends on the current playback timestamp , the timestamp of the first frame of the next segment
@@ -395,6 +400,9 @@ package org.mangui.hls.controller {
             var levels : Vector.<Level> = _hls.levels;
             if (HLSSettings.seekFromCurrentLevel) {
                 // keep current level
+                if (HLSSettings.seekAutoLevelSkipCount > 0) {
+                    _skipAutoLevel = HLSSettings.seekAutoLevelSkipCount;
+                }
                 return _hls.currentLevel;
             }
 

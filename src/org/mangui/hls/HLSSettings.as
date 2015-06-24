@@ -257,6 +257,17 @@ package org.mangui.hls {
         public static var seekFromCurrentLevel: Boolean = false;
 
         /**
+         * seekAutoLevelSkipCount
+         * 
+         * Do not use automatic start level for several fragments. Instead use currentLevel
+         * This is useful when first fragment after seek is loading slower then others, 
+         * for the level not to be changed.
+         * 
+         * Default is 0 (switched off)
+         */ 
+        public static var seekAutoLevelSkipCount: int = 0;
+
+        /**
          * useHardwareVideoDecoder
          *
          * Use hardware video decoder:
