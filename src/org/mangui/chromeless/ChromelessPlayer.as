@@ -95,7 +95,6 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("getstartFromLevel", _getstartFromLevel);
             ExternalInterface.addCallback("getSeekMode", _getSeekMode);
             ExternalInterface.addCallback("getseekFromLowestLevel", _getseekFromLevel);
-            ExternalInterface.addCallback("getseekFromCurrentLevel", _getseekFromCurrentLevel);
             ExternalInterface.addCallback("getseekAutoLevelSkipCount", _getseekAutoLevelSkipCount);
             ExternalInterface.addCallback("getCapLevelToWidth", _getCapLevelToWidth);
             ExternalInterface.addCallback("getCapLevelToHeight", _getCapLevelToHeight);
@@ -128,7 +127,6 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerSetstartFromLevel", _setstartFromLevel);
             ExternalInterface.addCallback("playerSetSeekMode", _setSeekMode);
             ExternalInterface.addCallback("playerSetseekFromLevel", _setseekFromLevel);
-            ExternalInterface.addCallback("playerSetseekFromCurrentLevel", _setseekFromCurrentLevel);
             ExternalInterface.addCallback("playerSetseekAutoLevelSkipCount", _setseekAutoLevelSkipCount);
             ExternalInterface.addCallback("playerSetCapLevelToWidth", _setCapLevelToWidth);
             ExternalInterface.addCallback("playerSetCapLevelToHeight", _setCapLevelToHeight);
@@ -342,10 +340,6 @@ package org.mangui.chromeless {
             return HLSSettings.seekFromLevel;
         };
 
-        protected function _getseekFromCurrentLevel() : Boolean {
-            return HLSSettings.seekFromCurrentLevel;
-        };
-
         protected function _getseekAutoLevelSkipCount() : int {
             return HLSSettings.seekAutoLevelSkipCount;
         };
@@ -490,10 +484,6 @@ package org.mangui.chromeless {
 
         protected function _setseekFromLevel(seekFromLevel : int) : void {
             HLSSettings.seekFromLevel = seekFromLevel;
-        };
-
-        protected function _setseekFromCurrentLevel(seekFromCurrentLevel : Boolean) : void {
-            HLSSettings.seekFromCurrentLevel = seekFromCurrentLevel;
         };
 
         protected function _setseekAutoLevelSkipCount(skipCount : int) : void {

@@ -248,20 +248,11 @@ package org.mangui.hls {
         public static var seekFromLevel : Number = -1;
 
         /**
-         * seekFromCurrentLevel
-         * 
-         * Seek from current level, ignore seekFromLevel setting and automatic start level selection.
-         * 
-         * Default is false
-         */ 
-        public static var seekFromCurrentLevel: Boolean = false;
-
-        /**
          * seekAutoLevelSkipCount
          * 
-         * Do not use automatic start level for several fragments. Instead use currentLevel
+         * Do not use automatic start level for several fragments after seek. Instead use currentLevel
          * This is useful when first fragment after seek is loading slower then others, 
-         * for the level not to be changed.
+         * and level is swithed to lowest and back to highest.
          * 
          * Default is 0 (switched off)
          */ 

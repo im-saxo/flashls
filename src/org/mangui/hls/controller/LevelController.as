@@ -398,11 +398,9 @@ package org.mangui.hls.controller {
         public function get seekLevel() : int {
             var seek_level : int = -1;
             var levels : Vector.<Level> = _hls.levels;
-            if (HLSSettings.seekFromCurrentLevel) {
+            if (HLSSettings.seekAutoLevelSkipCount > 0) {
                 // keep current level
-                if (HLSSettings.seekAutoLevelSkipCount > 0) {
-                    _skipAutoLevel = HLSSettings.seekAutoLevelSkipCount;
-                }
+                _skipAutoLevel = HLSSettings.seekAutoLevelSkipCount;
                 return _hls.currentLevel;
             }
 
