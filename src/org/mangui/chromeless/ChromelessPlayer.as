@@ -89,9 +89,11 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("getLogDebug2", _getLogDebug2);
             ExternalInterface.addCallback("getUseHardwareVideoDecoder", _getUseHardwareVideoDecoder);
             ExternalInterface.addCallback("getCapLeveltoStage", _getCapLeveltoStage);
+            ExternalInterface.addCallback("getMaxLevelCappingMode", _getMaxLevelCappingMode);
             ExternalInterface.addCallback("getAutoLevelCapping", _getAutoLevelCapping);
             ExternalInterface.addCallback("getflushLiveURLCache", _getflushLiveURLCache);
             ExternalInterface.addCallback("getstartFromLevel", _getstartFromLevel);
+            ExternalInterface.addCallback("getSeekMode", _getSeekMode);
             ExternalInterface.addCallback("getseekFromLowestLevel", _getseekFromLevel);
             ExternalInterface.addCallback("getseekFromCurrentLevel", _getseekFromCurrentLevel);
             ExternalInterface.addCallback("getseekAutoLevelSkipCount", _getseekAutoLevelSkipCount);
@@ -124,6 +126,7 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerSetbackBufferLength", _setbackBufferLength);
             ExternalInterface.addCallback("playerSetflushLiveURLCache", _setflushLiveURLCache);
             ExternalInterface.addCallback("playerSetstartFromLevel", _setstartFromLevel);
+            ExternalInterface.addCallback("playerSetSeekMode", _setSeekMode);
             ExternalInterface.addCallback("playerSetseekFromLevel", _setseekFromLevel);
             ExternalInterface.addCallback("playerSetseekFromCurrentLevel", _setseekFromCurrentLevel);
             ExternalInterface.addCallback("playerSetseekAutoLevelSkipCount", _setseekAutoLevelSkipCount);
@@ -136,6 +139,7 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerSetUseHardwareVideoDecoder", _setUseHardwareVideoDecoder);
             ExternalInterface.addCallback("playerSetAutoLevelCapping", _setAutoLevelCapping);
             ExternalInterface.addCallback("playerCapLeveltoStage", _setCapLeveltoStage);
+            ExternalInterface.addCallback("playerSetMaxLevelCappingMode", _setMaxLevelCappingMode);
             ExternalInterface.addCallback("playerSetAudioTrack", _setAudioTrack);
             ExternalInterface.addCallback("playerSetJSURLStream", _setJSURLStream);
             ExternalInterface.addCallback("playerSetManifestLoadMaxRetry", _setManifestLoadMaxRetry);
@@ -330,6 +334,10 @@ package org.mangui.chromeless {
             return HLSSettings.startFromLevel;
         };
 
+        protected function _getSeekMode() : String {
+            return HLSSettings.seekMode;
+        };
+
         protected function _getseekFromLevel() : int {
             return HLSSettings.seekFromLevel;
         };
@@ -356,6 +364,10 @@ package org.mangui.chromeless {
 
         protected function _getCapLeveltoStage() : Boolean {
             return HLSSettings.capLevelToStage;
+        };
+
+        protected function _getMaxLevelCappingMode() : String {
+            return HLSSettings.maxLevelCappingMode;
         };
 
         protected function _getAutoLevelCapping() : int {
@@ -472,6 +484,10 @@ package org.mangui.chromeless {
             HLSSettings.startFromLevel = startFromLevel;
         };
 
+        protected function _setSeekMode(value : String) : void {
+            HLSSettings.seekMode = value;
+        };
+
         protected function _setseekFromLevel(seekFromLevel : int) : void {
             HLSSettings.seekFromLevel = seekFromLevel;
         };
@@ -498,6 +514,10 @@ package org.mangui.chromeless {
 
         protected function _setCapLeveltoStage(value : Boolean) : void {
             HLSSettings.capLevelToStage = value;
+        };
+
+        protected function _setMaxLevelCappingMode(value : String) : void {
+            HLSSettings.maxLevelCappingMode = value;
         };
 
         protected function _setAutoLevelCapping(value : int) : void {

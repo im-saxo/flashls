@@ -93,6 +93,12 @@ package org.mangui.hls.stream {
             _fragmentLoader.stop();
             _altaudiofragmentLoader.stop();
             flushBuffer();
+            // reset position
+            _seekPositionReal = 0;
+            _playlistSlidingMain = 0;
+            // stop timer and dispatch one media time event
+            _timer.stop()
+            _checkBuffer(new Event(''));
         }
 
         /*
