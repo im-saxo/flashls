@@ -400,7 +400,8 @@ package org.mangui.hls.controller {
             var levels : Vector.<Level> = _hls.levels;
             if (HLSSettings.seekAutoLevelSkipCount > 0) {
                 // keep current level
-                _skipAutoLevel = HLSSettings.seekAutoLevelSkipCount;
+                // and set skip autolevel counts
+                _skipAutoLevel = HLSSettings.seekAutoLevelSkipCount - 1;
                 return _hls.currentLevel;
             }
 
