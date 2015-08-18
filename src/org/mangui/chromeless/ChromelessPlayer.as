@@ -106,6 +106,8 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("getAudioTrackId", _getAudioTrackId);
             ExternalInterface.addCallback("getManifestLoadMaxRetry", _getManifestLoadMaxRetry);
             ExternalInterface.addCallback("getFragmentLoadMaxRetry", _getFragmentLoadMaxRetry);
+            ExternalInterface.addCallback("getKeyLoadMaxRetry", _getKeyLoadMaxRetry);
+            ExternalInterface.addCallback("getFragmentLoadSkipAfterMaxRetry", _getFragmentLoadSkipAfterMaxRetry);
         };
 
         protected function _setupExternalCallers() : void {
@@ -142,6 +144,8 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerSetJSURLStream", _setJSURLStream);
             ExternalInterface.addCallback("playerSetManifestLoadMaxRetry", _setManifestLoadMaxRetry);
             ExternalInterface.addCallback("playerSetFragmentLoadMaxRetry", _setFragmentLoadMaxRetry);
+            ExternalInterface.addCallback("playerSetKeyLoadMaxRetry", _setKeyLoadMaxRetry);
+            ExternalInterface.addCallback("playerSetFragmentLoadSkipAfterMaxRetry", _setFragmentLoadSkipAfterMaxRetry);
         };
 
         protected function _setupExternalCallback() : void {
@@ -392,6 +396,14 @@ package org.mangui.chromeless {
             return HLSSettings.fragmentLoadMaxRetry;
         };
 
+        protected function _getKeyLoadMaxRetry() : Number {
+            return HLSSettings.keyLoadMaxRetry;
+        };
+
+        protected function _getFragmentLoadSkipAfterMaxRetry() : Boolean {
+            return HLSSettings.fragmentLoadSkipAfterMaxRetry;
+        };
+
         protected function _getJSURLStream() : Boolean {
             return (_hls.URLstream is JSURLStream);
         };
@@ -536,6 +548,14 @@ package org.mangui.chromeless {
 
         protected function _setFragmentLoadMaxRetry(value : int) : void {
             HLSSettings.fragmentLoadMaxRetry = value;
+        };
+
+        protected function _setKeyLoadMaxRetry(value : int) : void {
+            HLSSettings.keyLoadMaxRetry = value;
+        };
+
+        protected function _setFragmentLoadSkipAfterMaxRetry(value : Boolean) : void {
+            HLSSettings.fragmentLoadSkipAfterMaxRetry = value;
         };
 
         protected function _setJSURLStream(jsURLstream : Boolean) : void {
