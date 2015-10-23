@@ -109,6 +109,7 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("getKeyLoadMaxRetry", _getKeyLoadMaxRetry);
             ExternalInterface.addCallback("getFragmentLoadSkipAfterMaxRetry", _getFragmentLoadSkipAfterMaxRetry);
             ExternalInterface.addCallback("getStats", _getStats);
+            ExternalInterface.addCallback("getBandwidthLoadDelay", _getBandwidthLoadDelay);
         };
 
         protected function _setupExternalCallers() : void {
@@ -147,6 +148,7 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerSetFragmentLoadMaxRetry", _setFragmentLoadMaxRetry);
             ExternalInterface.addCallback("playerSetKeyLoadMaxRetry", _setKeyLoadMaxRetry);
             ExternalInterface.addCallback("playerSetFragmentLoadSkipAfterMaxRetry", _setFragmentLoadSkipAfterMaxRetry);
+            ExternalInterface.addCallback("playerSetBandwidthLoadDelay", _setBandwidthLoadDelay);
         };
 
         protected function _setupExternalCallback() : void {
@@ -442,6 +444,10 @@ package org.mangui.chromeless {
             return _hls.stats;
         };
 
+        protected function _getBandwidthLoadDelay() : int {
+            return HLSSettings.bandwidthLoadDelay;
+        };
+
         /** Javascript calls. **/
         protected function _load(url : String) : void {
             _hls.load(url);
@@ -573,6 +579,10 @@ package org.mangui.chromeless {
 
         protected function _setFragmentLoadSkipAfterMaxRetry(value : Boolean) : void {
             HLSSettings.fragmentLoadSkipAfterMaxRetry = value;
+        };
+
+        protected function _setBandwidthLoadDelay(value : int) : void {
+            HLSSettings.bandwidthLoadDelay = value;
         };
 
         protected function _setJSURLStream(jsURLstream : Boolean) : void {

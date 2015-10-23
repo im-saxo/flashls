@@ -408,5 +408,16 @@ package org.mangui.hls {
          * Default is true
          */
         public static var logError : Boolean = true;
+
+        /**
+         * bandwidthLoadDelay
+         *
+         * time in ms to add when calculating bandwidth. If -1, do not use it in calculations
+         * if bandwidthLoadDelay > -1, calculate bandwidth from floading_begin_time + const,
+         * instead of using loading_request_time
+         *
+         * Default is -1
+         */
+        public static var bandwidthLoadDelay : int = -1;
     }
 }

@@ -2,6 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
  package org.mangui.hls.event {
+
+    import org.mangui.hls.HLSSettings;
+
     /** Fragment Loading metrics **/
     public class HLSLoadMetrics {
         /* Loader Type : refer to HLSLoaderTypes for enumeration */
@@ -32,7 +35,12 @@
         }
 
         public function get bandwidth() : int {
-            return size * 8000 / (parsing_end_time - loading_request_time);
+            if (HLSSettings.bandwidthLoadDelay > -1) {
+                return size * 8000 / (HLSSettings.bandwidthLoadDelay + parsing_end_time - loading_begin_time);
+            }
+            else {
+                return size * 8000 / (parsing_end_time - loading_request_time);
+            }
         }
 
         public function get processing_duration() : int {
