@@ -24,12 +24,16 @@ package org.mangui.hls.demux {
         private static const RATES : Array = [96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350];
         /** ADIF profile index (ADTS doesn't have Null). **/
         private static const PROFILES : Array = ['Null', 'Main', 'LC', 'SSR', 'LTP', 'SBR'];
+        /** ADTS not found error **/
+        private static const ADTS_NOT_FOUND : String = "AAC:stream did not start with ADTS header";
         /** Byte data to be read **/
         private var _data : ByteArray;
         /* callback functions for audio selection, and parsing progress/complete */
         private var _callback_audioselect : Function;
         private var _callback_progress : Function;
         private var _callback_complete : Function;
+        private var _callback_error : Function;
+        private var _callback_id3tag : Function;
 
         /** append new data */
         public function append(data : ByteArray) : void {
@@ -63,6 +67,10 @@ package org.mangui.hls.demux {
             // AAC should contain ID3 tag filled with a timestamp
             var frames : Vector.<AudioFrame> = AACDemuxer.getFrames(_data, _data.position);
             var adif : ByteArray = getADIF(_data, id3.len);
+            if(adif == null && _callback_error != null) {
+                _callback_error(ADTS_NOT_FOUND);
+                return;
+            }
             var adifTag : FLVTag = new FLVTag(FLVTag.AAC_HEADER, id3.timestamp, id3.timestamp, true);
             adifTag.push(adif, 0, adif.length);
             audioTags.push(adifTag);
@@ -90,14 +98,23 @@ package org.mangui.hls.demux {
                 Log.debug("AAC: all tags extracted, callback demux");
             }
             _data = null;
+            if(id3.tags.length) {
+                _callback_id3tag(id3.tags);
+            }
             _callback_progress(audioTags);
             _callback_complete();
         }
 
-        public function AACDemuxer(callback_audioselect : Function, callback_progress : Function, callback_complete : Function) : void {
+        public function AACDemuxer(callback_audioselect : Function,
+                                   callback_progress : Function,
+                                   callback_complete : Function,
+                                   callback_error : Function,
+                                   callback_id3tag : Function) : void {
             _callback_audioselect = callback_audioselect;
             _callback_progress = callback_progress;
             _callback_complete = callback_complete;
+            _callback_error = callback_error;
+            _callback_id3tag = callback_id3tag;
         };
 
         public static function probe(data : ByteArray) : Boolean {
@@ -105,10 +122,14 @@ package org.mangui.hls.demux {
             var id3 : ID3 = new ID3(data);
             // AAC should contain ID3 tag filled with a timestamp
             if (id3.hasTimestamp) {
-                while (data.bytesAvailable > 1) {
+                var afterID3 : uint = data.position;
+                while (data.bytesAvailable > 1 && (data.position - afterID3) < 100) {
                     // Check for ADTS header
                     var short : uint = data.readUnsignedShort();
                     if (short == SYNCWORD || short == SYNCWORD_2 || short == SYNCWORD_3) {
+                        CONFIG::LOGGING {
+                            Log.debug2("AAC: found header " + short + "@ " + (data.position-2));
+                        }
                         data.position = pos;
                         return true;
                     } else {
@@ -142,20 +163,23 @@ package org.mangui.hls.demux {
                 var srate : uint = (adts.readByte() & 0x3C) >> 2;
                 adts.position--;
                 var channels : uint = (adts.readShort() & 0x01C0) >> 6;
+                // 5 bits profile + 4 bits samplerate + 4 bits channels.
+                var adif : ByteArray = new ByteArray();
+                adif.writeByte((profile << 3) + (srate >> 1));
+                adif.writeByte((srate << 7) + (channels << 3));
+                CONFIG::LOGGING {
+                    Log.debug('AAC: ' + PROFILES[profile] + ', ' + RATES[srate] + ' Hz ' + channels + ' channel(s)');
+                }
+                // Reset position and return adif.
+                adts.position -= 4;
+                adif.position = 0;
+                return adif;
             } else {
-                throw new Error("Stream did not start with ADTS header.");
+                CONFIG::LOGGING {
+                    Log.error(ADTS_NOT_FOUND);
+                }
+                return null;
             }
-            // 5 bits profile + 4 bits samplerate + 4 bits channels.
-            var adif : ByteArray = new ByteArray();
-            adif.writeByte((profile << 3) + (srate >> 1));
-            adif.writeByte((srate << 7) + (channels << 3));
-            CONFIG::LOGGING {
-                Log.debug('AAC: ' + PROFILES[profile] + ', ' + RATES[srate] + ' Hz ' + channels + ' channel(s)');
-            }
-            // Reset position and return adif.
-            adts.position -= 4;
-            adif.position = 0;
-            return adif;
         };
 
         /** Get a list with AAC frames from ADTS stream. **/

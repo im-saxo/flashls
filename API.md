@@ -89,6 +89,26 @@ by monitoring the below event, that will be triggered for every seek state chang
 HLSEvent.SEEK_STATE
 ```
 
+### monitoring playback position, buffer progress, live playlist sliding, watched time ...
+
+#### hls.position
+return current playback relative position( relative to live main playlist sliding), in seconds
+
+#### hls.liveSlidingMain
+Return the live main playlist sliding since previous out of buffer ```seek()```, in seconds 
+
+#### hls.liveSlidingAltAudio
+Return the live alternate audio playlist sliding since previous out of buffer ```seek()```,in seconds
+
+#### hls.stream.bufferLength
+Return the current buffer length, in seconds
+
+#### hls.stream.backBufferLength
+Return the current back buffer length, in seconds
+
+#### hls.watched
+Return the current watched time in seconds, since last call to ```hls.load(URL)```
+
 ## Controlling Quality Switch
 
 by default flashls handles quality switch automatically, using heuristics.
@@ -116,16 +136,19 @@ get : return quality level used to load first fragment after a seek operation
 
 #### hls.currentLevel
 get : return current playback quality level
+
 set : trigger an immediate quality level switch to new quality level. this will pause the video if it was playing, flush the whole buffer, and fetch fragment matching with current position and requested quality level. then resume the video if needed once fetched fragment will have been buffered.
 set to -1 for automatic level selection
 
 #### hls.nextLevel
 get : return next playback quality level (playback quality level for next buffered fragment). return -1 if next fragment not buffered yet
+
 set : trigger a quality level switch for next fragment. this could eventually flush already buffered next fragment
 set to -1 for automatic level selection
 
 #### hls.loadLevel
 get : return last loaded fragment quality level.
+
 set : set quality level for next loaded fragment
 set to -1 for automatic level selection
 
@@ -137,6 +160,46 @@ getter : tell whether auto level selection is enabled or not
 get/set : capping/max level value that could be used by automatic level selection algorithm
 
 default value is -1 (no level capping)
+
+
+#### hls.stats
+get : return playback session stats
+
+```js
+{
+  tech : 'flashls',
+  levelNb : total nb of quality level referenced in Manifest
+  levelStart : first quality level experienced by End User
+  autoLevelMin : min quality level experienced by End User (in auto mode)
+  autoLevelMax : max quality level experienced by End User (in auto mode)
+  autoLevelAvg : avg quality level experienced by End User (in auto mode)
+  autoLevelLast : last quality level experienced by End User (in auto mode)
+  autoLevelSwitch : nb of quality level switch in auto mode
+  autoLevelCappingMin : min auto quality level capping value
+  autoLevelCappingMax : max auto quality level capping value
+  autoLevelCappingLast : last auto quality level capping value
+  manualLevelMin : min quality level experienced by End User (in manual mode)
+  manualLevelMax : max quality level experienced by End User (in manual mode)
+  manualLevelLast : last quality level experienced by End User (in manual mode)
+  manualLevelSwitch : nb of quality level switch in manual mode
+  fragLastKbps : last fragment load bandwidth  
+  fragMinKbps : min fragment load bandwidth
+  fragMaxKbps : max fragment load bandwidth
+  fragAvgKbps : avg fragment load bandwidth
+  fragLastLatency : last fragment load latency
+  fragMinLatency : min fragment load latency
+  fragMaxLatency : max fragment load latency
+  fragAvgLatency : avg fragment load latency
+  fragBuffered : total nb of buffered fragments
+  fragBufferedBytes : total nb of buffered bytes
+  fragSkipped : total nb of skipped fragments
+  fragChangedAuto : nb of frag played (loaded in auto mode)
+  fragChangedManual : nb of frag played (loaded in manual mode)
+}
+```
+
+#### ```hls.startLoad()```
+start/restart playlist/fragment loading. this is only effective if MANIFEST_PARSED event has been triggered
 
 ##Events
 
@@ -171,8 +234,12 @@ full list of Events is described below :
   	-  data: {url : manifest URL}
   - `HLSEvent.FRAGMENT_LOADED`  - triggered after a fragment has been succesfully loaded
   	-  data: { loadMetrics : HLSLoadMetrics }
+  - `HLSEvent.FRAGMENT_LOAD_EMERGENCY_ABORTED`  - triggered when fragment loading is aborted because of a sudden bandwidth drop
+    -  data: { loadMetrics : HLSLoadMetrics }
   - `HLSEvent.FRAGMENT_PLAYING`  - triggered when playback switches to a new fragment
   	-  data: { playMetrics : HLSPlayMetrics }
+  - `HLSEvent.FRAGMENT_SKIPPED`  - triggered when a fragment has been skipped because of fragment load I/O error
+    -  data: { duration : skipped fragment duration }
   - `HLSEvent.AUDIO_TRACKS_LIST_CHANGE`  - triggered when available audio tracks list changes
   	-  data: none
   - `HLSEvent.AUDIO_TRACK_SWITCH`  - triggered when switching to a different audio track
@@ -199,3 +266,13 @@ full list of Events is described below :
   	-  data: { duration : new duration}
   - `HLSEvent.ID3_UPDATED` - triggered when new ID3 tag is available (fired during playback at the right playback timestamp)
   	-  data: { ID3Data : Hex String of ID3 representation }
+  - `HLSEvent.STAGE_SET` - triggered when Stage object has been attached to hls instance
+    -  data: none
+  - `HLSEvent.FPS_DROP` - triggered when FPS drop in last monitoring period is higher than given threshold
+    -  data: { level : current playback quality level}
+  - `HLSEvent.FPS_DROP_LEVEL_CAPPING` - triggered when FPS drop triggers auto level capping
+    -  data: { level : max autolevel }
+  - `HLSEvent.FPS_DROP_SMOOTH_LEVEL_SWITCH` - triggered when FPS drop triggers a smooth auto level down switching
+    -  data: none
+  - `HLSEvent.LIVE_LOADING_STALLED` - triggered when fragment loading stalls when playing back live content
+    -  data: none

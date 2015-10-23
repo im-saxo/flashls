@@ -7,6 +7,19 @@ package org.mangui.hls {
 
     public final class HLSSettings extends Object {
         /**
+         * autoStartLoad
+         *
+         * if set to true,
+         *      start level playlist and first fragments will be loaded automatically,
+         *      after triggering of HlsEvent.MANIFEST_PARSED event
+         * if set to false,
+         *      an explicit API call (hls.startLoad()) will be needed
+         *      to start quality level/fragment loading.
+         *
+         * Default is true
+         */
+        public static var autoStartLoad : Boolean = true;
+        /**
          * capLevelToStage
          *
          * Limit levels usable in auto-quality by the stage dimensions (width and height).
@@ -87,6 +100,17 @@ package org.mangui.hls {
          */
         public static var minBufferLength : Number = -1;
 
+
+        /**
+         * minBufferLengthCapping
+         *
+         * Defines minimum buffer length capping value (max value) if minBufferLength is set to -1
+         *
+         * Default is -1 = no capping
+         */
+        public static var minBufferLengthCapping : Number = -1;
+
+
         /**
          * maxBufferLength
          *
@@ -116,6 +140,65 @@ package org.mangui.hls {
          * Default is 3
          */
         public static var lowBufferLength : Number = 3;
+
+        /**
+         * mediaTimeUpdatePeriod
+         *
+         * time update period in ms
+         * period at which HLSEvent.MEDIA_TIME will be triggered
+         * Default is 100 ms
+         */
+        public static var mediaTimePeriod : int = 100;
+
+        /**
+         * fpsDroppedMonitoringPeriod
+         *
+         * dropped FPS Monitor Period in ms
+         * period at which nb dropped FPS will be checked
+         * Default is 5000 ms
+         */
+        public static var fpsDroppedMonitoringPeriod : int = 5000;
+
+        /**
+         * fpsDroppedMonitoringThreshold
+         *
+         * dropped FPS Threshold
+         * every fpsDroppedMonitoringPeriod, dropped FPS will be compared to displayed FPS.
+         * if during that period, ratio of (dropped FPS/displayed FPS) is greater or equal
+         * than fpsDroppedMonitoringThreshold, HLSEvent.FPS_DROP event will be fired
+         * Default is 0.2 (20%)
+         */
+        public static var fpsDroppedMonitoringThreshold : Number = 0.2;
+
+
+        /**
+         * capLevelonFPSDrop
+         *
+         * Limit levels usable in auto-quality when FPS drop is detected
+         * i.e. if frame drop is detected on level 5, auto level will be capped to level 4 a
+         *      true -  enabled
+         *      false - disabled
+         *
+         * Note: this setting is ignored in manual mode so all the levels could be selected manually.
+         *
+         * Default is false
+         */
+        public static var capLevelonFPSDrop : Boolean = false;
+
+        /**
+         * smoothAutoSwitchonFPSDrop
+         *
+         * force a smooth level switch Limit when FPS drop is detected in auto-quality
+         * i.e. if frame drop is detected on level 5, it will trigger an auto quality level switch
+         * to level 4 for next fragment
+         *      true -  enabled
+         *      false - disabled
+         *
+         * Note: this setting is active only if capLevelonFPSDrop==true
+         *
+         * Default is true
+         */
+        public static var smoothAutoSwitchonFPSDrop : Boolean = true;
 
         /**
          * seekMode
@@ -236,6 +319,18 @@ package org.mangui.hls {
          */
         public static var startFromLevel : Number = -1;
 
+
+        /**
+         * autoStartMaxDuration
+         *
+         * max fragment loading duration in automatic start level selection mode (in ms)
+         * -1 : max duration not capped
+         * other : max duration is capped to avoid long playback starting time
+         *
+         * Default is -1
+         */
+        public static var autoStartMaxDuration : Number = -1;
+
         /**
          * seekFromLevel
          *
@@ -265,9 +360,9 @@ package org.mangui.hls {
          *  it will set NetStream.useHardwareDecoder
          *  refer to http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/NetStream.html#useHardwareDecoder
          *
-         * Default is false
+         * Default is true
          */
-        public static var useHardwareVideoDecoder : Boolean = false;
+        public static var useHardwareVideoDecoder : Boolean = true;
 
         /**
          * logInfo

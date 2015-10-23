@@ -26,31 +26,39 @@ package org.mangui.hls.controller {
         /** switch down threshold **/
         private var _switchdown : Vector.<Number> = null;
         /** bitrate array **/
-        private var _bitrate : Vector.<Number> = null;
+        private var _bitrate : Vector.<uint> = null;
         /** vector of levels with unique dimension with highest bandwidth **/
         private var _maxUniqueLevels : Vector.<Level> = null;
         /** nb level **/
         private var _nbLevel : int = 0;
         private var _lastSegmentDuration : Number;
         private var _lastFetchDuration : Number;
-        private var  lastBandwidth : Number;
-        private var  _autoLevelCapping : int = -1;
+        private var  lastBandwidth : int;
+        private var  _autoLevelCapping : int;
         private var  _startLevel : int = -1;
         private var _skipAutoLevel : int = 0;
+        private var  _fpsController : FPSController;
 
         /** Create the loader. **/
         public function LevelController(hls : HLS) : void {
             _hls = hls;
-            _hls.addEventListener(HLSEvent.MANIFEST_PARSED, _manifestParsedHandler);
+            _fpsController = new FPSController(hls);
+            /* low priority listener, so that other listeners with default priority
+               could seamlessly set hls.startLevel in their HLSEvent.MANIFEST_PARSED listener */
+            _hls.addEventListener(HLSEvent.MANIFEST_PARSED, _manifestParsedHandler, false, int.MIN_VALUE);
             _hls.addEventListener(HLSEvent.MANIFEST_LOADED, _manifestLoadedHandler);
             _hls.addEventListener(HLSEvent.FRAGMENT_LOADED, _fragmentLoadedHandler);
+            _hls.addEventListener(HLSEvent.FRAGMENT_LOAD_EMERGENCY_ABORTED, _fragmentLoadedHandler);
         }
         ;
 
         public function dispose() : void {
+            _fpsController.dispose();
+            _fpsController = null;
             _hls.removeEventListener(HLSEvent.MANIFEST_PARSED, _manifestParsedHandler);
             _hls.removeEventListener(HLSEvent.MANIFEST_LOADED, _manifestLoadedHandler);
             _hls.removeEventListener(HLSEvent.FRAGMENT_LOADED, _fragmentLoadedHandler);
+            _hls.removeEventListener(HLSEvent.FRAGMENT_LOAD_EMERGENCY_ABORTED, _fragmentLoadedHandler);
         }
 
         private function _fragmentLoadedHandler(event : HLSEvent) : void {
@@ -64,8 +72,10 @@ package org.mangui.hls.controller {
         }
 
         private function _manifestParsedHandler(event : HLSEvent) : void {
-            // upon manifest parsed event, trigger a level switch to load startLevel playlist
-            _hls.dispatchEvent(new HLSEvent(HLSEvent.LEVEL_SWITCH, _hls.startLevel));
+            if(HLSSettings.autoStartLoad) {
+                // upon manifest parsed event, trigger a level switch to load startLevel playlist
+                _hls.dispatchEvent(new HLSEvent(HLSEvent.LEVEL_SWITCH, startLevel));
+            }
         }
 
         private function _manifestLoadedHandler(event : HLSEvent) : void {
@@ -73,9 +83,10 @@ package org.mangui.hls.controller {
             var maxswitchup : Number = 0;
             var minswitchdwown : Number = Number.MAX_VALUE;
             _nbLevel = levels.length;
-            _bitrate = new Vector.<Number>(_nbLevel, true);
+            _bitrate = new Vector.<uint>(_nbLevel, true);
             _switchup = new Vector.<Number>(_nbLevel, true);
             _switchdown = new Vector.<Number>(_nbLevel, true);
+            _autoLevelCapping = -1;
             _lastSegmentDuration = 0;
             _lastFetchDuration = 0;
             lastBandwidth = 0;
@@ -116,10 +127,27 @@ package org.mangui.hls.controller {
         }
         ;
 
-        public function getbestlevel(downloadBandwidth : Number) : int {
+        public function getAutoStartBestLevel(downloadBandwidth : int, initialDelay : int, lastSegmentDuration : int) : int {
+            var bwFactor : Number;
             var max_level : int = _getMaxLevel();
+            // in case initial delay is capped
+            if(HLSSettings.autoStartMaxDuration != -1) {
+                // if we are above initial delay, stick to level 0
+                if(initialDelay >= HLSSettings.autoStartMaxDuration) {
+                    return 0;
+                } else {
+                    // if we still have some time to load another fragment, determine load factor:
+                    // if we have 10000ms fragment, and we have 1000s left, we need a bw 10 times bigger to accomodate
+                    bwFactor = lastSegmentDuration/(HLSSettings.autoStartMaxDuration-initialDelay);
+                }
+            } else {
+                bwFactor = 1;
+            }
+            CONFIG::LOGGING {
+                Log.debug("getAutoStartBestLevel,initialDelay/max delay/bwFactor=" + initialDelay + "/" + HLSSettings.autoStartMaxDuration + "/" + bwFactor.toFixed(2));
+            }
             for (var i : int = max_level; i >= 0; i--) {
-                if (_bitrate[i] <= downloadBandwidth) {
+                if (_bitrate[i]*bwFactor <= downloadBandwidth) {
                     return i;
                 }
             }
@@ -312,6 +340,9 @@ package org.mangui.hls.controller {
             return 0;
         }
 
+        public function isStartLevelSet() : Boolean {
+            return (_startLevel >=0);
+        }
 
         /*  set the quality level used when starting a fresh playback */
         public function set startLevel(level : int) : void {
@@ -406,8 +437,8 @@ package org.mangui.hls.controller {
             }
 
             if (HLSSettings.seekFromLevel == -1) {
-                // keep last level
-                return _hls.loadLevel;
+                // keep last level, but don't exceed _maxLevel
+                return Math.min(_hls.loadLevel,_getMaxLevel());
             }
 
             // set up seek level as being the lowest non-audio level.

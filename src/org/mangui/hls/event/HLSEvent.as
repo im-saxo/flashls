@@ -28,8 +28,12 @@ package org.mangui.hls.event {
         public static const FRAGMENT_LOADING : String = "hlsEventFragmentLoading";
         /** Identifier for a fragment loaded event. **/
         public static const FRAGMENT_LOADED : String = "hlsEventFragmentLoaded";
+        /* Identifier for fragment load aborting for emergency switch down */
+        public static const FRAGMENT_LOAD_EMERGENCY_ABORTED : String = "hlsEventFragmentLoadEmergencyAborted";
         /** Identifier for a fragment playing event. **/
         public static const FRAGMENT_PLAYING : String = "hlsEventFragmentPlaying";
+        /** Identifier for a fragment skipping event. **/
+        public static const FRAGMENT_SKIPPED : String = "hlsEventFragmentSkipped";
         /** Identifier for a audio tracks list change **/
         public static const AUDIO_TRACKS_LIST_CHANGE : String = "audioTracksListChange";
         /** Identifier for a audio track switch **/
@@ -50,12 +54,25 @@ package org.mangui.hls.event {
         public static const PLAYBACK_STATE : String = "hlsPlaybackState";
         /** Identifier for a seek state switch event. **/
         public static const SEEK_STATE : String = "hlsSeekState";
+        /** Identifier for stream type changes: VoD or Live, type will be stored in 'streamType' field **/
+        public static const STREAM_TYPE_DID_CHANGE:String = "hlsEventStreamTypeDidChange";
         /** Identifier for a playback complete event. **/
         public static const PLAYBACK_COMPLETE : String = "hlsEventPlayBackComplete";
         /** Identifier for a Playlist Duration updated event **/
         public static const PLAYLIST_DURATION_UPDATED : String = "hlsPlayListDurationUpdated";
         /** Identifier for a ID3 updated event **/
         public static const ID3_UPDATED : String = "hlsID3Updated";
+        /** Identifier for a fps drop event **/
+        public static const FPS_DROP : String = "hlsFPSDrop";
+        /** Identifier for a fps drop level capping event **/
+        public static const FPS_DROP_LEVEL_CAPPING : String = "hlsFPSDropLevelCapping";
+        /** Identifier for a fps drop smooth level switch event **/
+        public static const FPS_DROP_SMOOTH_LEVEL_SWITCH : String = "hlsFPSDropSmoothLevelSwitch";
+        /** Identifier for a live loading stalled event **/
+        public static const LIVE_LOADING_STALLED : String = "hlsLiveLoadingStalled";
+        /** Identifier for a Stage set event **/
+        public static const STAGE_SET : String = "hlsStageSet";
+
         /** The current url **/
         public var url : String;
         /** The current quality level. **/
@@ -74,6 +91,8 @@ package org.mangui.hls.event {
         public var mediatime : HLSMediatime;
         /** The new playback state. **/
         public var state : String;
+        /** The new stream type value **/
+        public var streamType: String;
         /** The current audio track **/
         public var audioTrack : int;
         /** a complete ID3 payload from PES, as a hex dump **/
@@ -82,49 +101,59 @@ package org.mangui.hls.event {
         /** Assign event parameter and dispatch. **/
         public function HLSEvent(type : String, parameter : *=null, parameter2 : *=null) {
             switch(type) {
-                case HLSEvent.MANIFEST_LOADING:
-                case HLSEvent.FRAGMENT_LOADING:
+                case MANIFEST_LOADING:
+                case FRAGMENT_LOADING:
                     url = parameter as String;
                     break;
-                case HLSEvent.ERROR:
+                case ERROR:
                     error = parameter as HLSError;
                     break;
-                case HLSEvent.TAGS_LOADED:
-                case HLSEvent.FRAGMENT_LOADED:
-                case HLSEvent.LEVEL_LOADED:
-                case HLSEvent.AUDIO_LEVEL_LOADED:
+                case TAGS_LOADED:
+                case FRAGMENT_LOADED:
+                case FRAGMENT_LOAD_EMERGENCY_ABORTED:
+                case LEVEL_LOADED:
+                case AUDIO_LEVEL_LOADED:
                     loadMetrics = parameter as HLSLoadMetrics;
                     break;
-                case HLSEvent.MANIFEST_PARSED:
-                case HLSEvent.MANIFEST_LOADED:
+                case MANIFEST_PARSED:
+                case MANIFEST_LOADED:
                     levels = parameter as Vector.<Level>;
                     if(parameter2) {
                         loadMetrics = parameter2 as HLSLoadMetrics;
                     }
                     break;
-                case HLSEvent.MEDIA_TIME:
+                case MEDIA_TIME:
                     mediatime = parameter as HLSMediatime;
                     break;
-                case HLSEvent.PLAYBACK_STATE:
-                case HLSEvent.SEEK_STATE:
+                case PLAYBACK_STATE:
+                case SEEK_STATE:
                     state = parameter as String;
                     break;
-                case HLSEvent.LEVEL_LOADING:
-                case HLSEvent.LEVEL_SWITCH:
-                case HLSEvent.AUDIO_LEVEL_LOADING:
+                case LEVEL_LOADING:
+                case LEVEL_SWITCH:
+                case AUDIO_LEVEL_LOADING:
+                case FPS_DROP:
+                case FPS_DROP_LEVEL_CAPPING:
                     level = parameter as int;
                     break;
-                case HLSEvent.PLAYLIST_DURATION_UPDATED:
+                case PLAYLIST_DURATION_UPDATED:
+                case FRAGMENT_SKIPPED:
                     duration = parameter as Number;
                     break;
-                case HLSEvent.ID3_UPDATED:
+                case ID3_UPDATED:
                     ID3Data = parameter as String;
                     break;
-                case HLSEvent.FRAGMENT_PLAYING:
+                case FRAGMENT_PLAYING:
                     playMetrics = parameter as HLSPlayMetrics;
+                    break;
+                case HLSEvent.STREAM_TYPE_DID_CHANGE:
+                    // Stream Type is required
+                    streamType = String(parameter);
+                    break;
+                default:
                     break;
             }
             super(type, false, false);
-        };
+        }
     }
 }

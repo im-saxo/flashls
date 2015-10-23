@@ -29,8 +29,10 @@ package org.mangui.hls.model {
         public var width : int;
         /** video height (from playlist) **/
         public var height : int;
-        /** URL of this bitrate level (for M3U8). **/
-        public var url : String;
+        /** URL of this bitrate level (for M3U8). (it is a vector so that we can store redundant streams in same level) **/
+        public var urls : Vector.<String>;
+        // index of used url (non 0 if we switch to a redundant stream)
+        private var _redundantStreamId : int = 0;
         /** Level fragments **/
         public var fragments : Vector.<Fragment>;
         /** min sequence number from M3U8. **/
@@ -50,6 +52,31 @@ package org.mangui.hls.model {
         public function Level() : void {
             this.fragments = new Vector.<Fragment>();
         };
+
+        public function get url() : String {
+            return urls[_redundantStreamId];
+        }
+
+        public function get redundantStreamsNb() : int {
+            if(urls && urls.length) {
+                return urls.length-1;
+            } else {
+                return 0;
+            }
+        }
+
+        public function get redundantStreamId() : int {
+            return _redundantStreamId;
+        }
+
+        // when switching to a redundant stream, reset fragments. they will be retrieved from new playlist
+        public function set redundantStreamId(id : int) : void {
+            if(id < urls.length && id != _redundantStreamId) {
+                _redundantStreamId = id;
+                fragments = new Vector.<Fragment>();
+                start_seqnum = end_seqnum = NaN;
+            }
+        }
 
         /** Return the Fragment before a given time position. **/
         public function getFragmentBeforePosition(position : Number) : Fragment {
@@ -72,10 +99,17 @@ package org.mangui.hls.model {
                 return -1;
 
             var len : int = fragments.length;
-            for (var i : int = 0; i < len; i++) {
-                /* check whether fragment contains current position */
-                if (fragments[i].data.valid && fragments[i].program_date <= program_date && fragments[i].program_date + 1000 * fragments[i].duration > program_date) {
-                    return (start_seqnum + i);
+            if(len) {
+                if (program_date > (fragments[len-1].program_date + 1000*fragments[len-1].duration))
+                    return -1;
+
+                for (var i : int = 0; i < len; i++) {
+                    /* check whether fragment contains current position */
+                    if (fragments[i].data.valid &&
+                        (fragments[i].program_date <= program_date) &&
+                        (fragments[i].program_date + 1000 * fragments[i].duration) > program_date) {
+                        return (start_seqnum + i);
+                    }
                 }
             }
             return -1;

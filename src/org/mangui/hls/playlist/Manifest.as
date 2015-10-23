@@ -2,16 +2,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package org.mangui.hls.playlist {
-    import flash.events.*;
-    import flash.net.*;
+    import flash.events.Event;
+    import flash.events.IOErrorEvent;
+    import flash.events.ProgressEvent;
+    import flash.events.SecurityErrorEvent;
+    import flash.net.URLLoader;
+    import flash.net.URLRequest;
     import flash.utils.ByteArray;
     import flash.utils.Dictionary;
     import flash.utils.getTimer;
+    
+    import org.mangui.hls.HLS;
     import org.mangui.hls.constant.HLSLoaderTypes;
     import org.mangui.hls.constant.HLSTypes;
-    import org.mangui.hls.event.HLSEvent;
     import org.mangui.hls.event.HLSLoadMetrics;
-    import org.mangui.hls.HLS;
     import org.mangui.hls.model.Fragment;
     import org.mangui.hls.model.Level;
     import org.mangui.hls.utils.DateUtil;
@@ -350,13 +354,17 @@ package org.mangui.hls.playlist {
                     }
                 } else if (level_found == true) {
                     if(!(level.bitrate in bitrateDictionary)) {
-                        level.url = _extractURL(line, base);
+                        level.urls = new Vector.<String>();
+                        level.urls.push(_extractURL(line, base));
                         level.manifest_index = levels.length;
                         levels.push(level);
-                        bitrateDictionary[level.bitrate] = true;
+                        bitrateDictionary[level.bitrate] = level;
                     } else {
+                        level = bitrateDictionary[level.bitrate];
+                        var redundantURL:String = _extractURL(line, base);
+                        level.urls.push(redundantURL);
                        CONFIG::LOGGING {
-                            Log.debug("discard failover level with bitrate " + level.bitrate);
+                            Log.debug("found failover level with url " + redundantURL);
                         }
                     }
                     level_found = false;
