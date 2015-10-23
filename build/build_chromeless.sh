@@ -17,7 +17,7 @@ OPT_RELEASE="-use-network=false \
     -define=CONFIG::FLASH_11_1,true"
 
 echo "Compiling bin/debug/flashlsChromeless.swf"
-$FLEXPATH/bin/mxmlc ../src/org/mangui/chromeless/ChromelessPlayer.as \
+"$FLEXPATH"/bin/mxmlc ../src/org/mangui/chromeless/ChromelessPlayer.as \
     -source-path ../src \
     -o ../bin/debug/flashlsChromeless.swf \
     $OPT_DEBUG \
@@ -27,7 +27,7 @@ $FLEXPATH/bin/mxmlc ../src/org/mangui/chromeless/ChromelessPlayer.as \
     -default-background-color=0x000000
 ./add-opt-in.py ../bin/debug/flashlsChromeless.swf
 
-$FLEXPATH/bin/mxmlc ../src/org/mangui/chromeless/ChromelessPlayer.as \
+"$FLEXPATH"/bin/mxmlc ../src/org/mangui/chromeless/ChromelessPlayer.as \
     -source-path ../src \
     -o ../bin/release/flashlsChromeless.swf \
     $OPT_RELEASE \
