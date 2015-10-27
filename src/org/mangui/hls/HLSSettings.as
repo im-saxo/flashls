@@ -253,7 +253,7 @@ package org.mangui.hls {
          *
          * Default is 4000
          */
-        public static var fragmentLoadMaxRetryTimeout : Number = 4000
+        public static var fragmentLoadMaxRetryTimeout : Number = 4000;
 
         /**
          * fragmentLoadSkipAfterMaxRetry
@@ -419,5 +419,15 @@ package org.mangui.hls {
          * Default is -1
          */
         public static var bandwidthLoadDelay : int = -1;
+
+        /**
+         * fragmentsLoadStrict
+         *
+         * This parameter defines what to do after fragment load error. By default, try to load another fragment or load next fragment
+         * When fragmentsLoadStrict is true and fragmentLoadMaxRetry is exceeded, throw fragmentLoadError and stop loading
+         *
+         * Default is false
+         */
+        public static var fragmentsLoadStrict  : Boolean = false;
     }
 }

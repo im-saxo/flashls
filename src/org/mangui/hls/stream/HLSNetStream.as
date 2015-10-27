@@ -438,6 +438,10 @@ package org.mangui.hls.stream {
             _timer.start();
         }
 
+        public function retryLoadFragment (fragmentIndex : int, useCurrentLevel : Boolean, fragmentLevel : int) : void {
+            _streamBuffer.retryLoadFragment(fragmentIndex, useCurrentLevel, fragmentLevel);
+        }
+
         public override function set client(client : Object) : void {
             _client.delegate = client;
         }

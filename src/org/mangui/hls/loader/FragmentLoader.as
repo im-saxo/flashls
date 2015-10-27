@@ -6,21 +6,24 @@ package org.mangui.hls.loader {
     import flash.events.*;
     import flash.net.*;
     import flash.utils.ByteArray;
-    import flash.utils.getTimer;
     import flash.utils.Timer;
+    import flash.utils.getTimer;
+    
+    import org.mangui.hls.HLS;
+    import org.mangui.hls.HLSSettings;
     import org.mangui.hls.constant.HLSLoaderTypes;
+    import org.mangui.hls.constant.HLSPlayStates;
     import org.mangui.hls.constant.HLSTypes;
     import org.mangui.hls.controller.AudioTrackController;
     import org.mangui.hls.controller.LevelController;
-    import org.mangui.hls.demux.Demuxer;
     import org.mangui.hls.demux.DemuxHelper;
+    import org.mangui.hls.demux.Demuxer;
     import org.mangui.hls.demux.ID3Tag;
     import org.mangui.hls.event.HLSError;
     import org.mangui.hls.event.HLSEvent;
+    import org.mangui.hls.event.HLSFragmentLoadError;
     import org.mangui.hls.event.HLSLoadMetrics;
     import org.mangui.hls.flv.FLVTag;
-    import org.mangui.hls.HLS;
-    import org.mangui.hls.HLSSettings;
     import org.mangui.hls.model.AudioTrack;
     import org.mangui.hls.model.Fragment;
     import org.mangui.hls.model.FragmentData;
@@ -336,6 +339,65 @@ package org.mangui.hls.loader {
             _timer.start();
         }
 
+        /**
+         * Manual fragment reload. It works only with HLSSettings.fragmentsLoadStrict option
+         * @param fragmentIndex 
+         * @param useCurrentLevel try to reload fragment from current level
+         * @param fragmentLevel try to reload fragment from given level. 
+         * If the value is -1, take prevoius level
+         * 
+         */
+        public function retryLoadFragment (fragmentIndex : int, useCurrentLevel : Boolean, fragmentLevel : int) : void {
+            CONFIG::LOGGING {
+                Log.debug("FragmentLoader: retryLoadFragment: fragmentIndex: " + fragmentIndex + ", fragmentLevel: " + fragmentLevel);
+            }
+            if (!HLSSettings.fragmentsLoadStrict || !HLSSettings.fragmentLoadMaxRetry) {
+                return;
+            }
+            // choose level
+            var desiredLevel:int, level:Level, fragment:Fragment;
+            if (useCurrentLevel) {
+                desiredLevel = _levelNext;
+            } else if (fragmentLevel == -1) {
+                // take lower level, or higher level if current is the lowest
+                desiredLevel = _levelNext > 0 ? _levelNext - 1 : _levelNext + 1;
+                if (!_levels[desiredLevel]) {
+                    // no higher level
+                    desiredLevel--;
+                }
+            } else {
+                desiredLevel = fragmentLevel;
+            }
+            level = _levels[desiredLevel];
+            CONFIG::LOGGING {
+                Log.debug("FragmentLoader: choose level: " + desiredLevel);
+            }
+            
+            // choose fragment
+            for (var segnum: uint = fragmentIndex; segnum <= level.end_seqnum; segnum++) {
+                fragment = level.getFragmentfromSeqNum(segnum);
+                if (fragment.data.bytesLoaded == 0) {
+                    //choose first not-loaded fragment
+                    break;
+                }
+            }
+            if (fragment.data.bytes != null) {
+                // this is the last fragment and it is loaded
+                return;
+            }
+            CONFIG::LOGGING {
+                Log.debug("FragmentLoader: choose fragment: seqnum: " + fragment.seqnum);
+            }
+            // load fragment
+            _fragRetryCount = _keyRetryCount = 0;
+            _fragRetryTimeout = _keyRetryTimeout = 1000;
+            _fragPrevious = level.getFragmentfromSeqNum(fragment.seqnum - 1);
+            _levelNext = desiredLevel;
+            _loadfragment(fragment);
+            _loadingState = LOADING_IN_PROGRESS;
+            _timer.start();
+        }
+
         /** key load completed. **/
         private function _keyLoadCompleteHandler(event : Event) : void {
             if (_loadingState == LOADING_IDLE)
@@ -393,7 +455,7 @@ package org.mangui.hls.loader {
             }
         }
 
-        private function _fraghandleIOError(message : String) : void {
+        private function _fraghandleIOError(message : String, event : ErrorEvent = null) : void {
             /* usually, errors happen in two situations :
             - bad networks  : in that case, the second or third reload of URL should fix the issue
                                if loading retry still fails after HLSSettings.fragmentLoadMaxRetry, and
@@ -415,6 +477,15 @@ package org.mangui.hls.loader {
                 /* exponential increase of retry timeout, capped to fragmentLoadMaxRetryTimeout */
                 _fragRetryCount++;
                 _fragRetryTimeout = Math.min(HLSSettings.fragmentLoadMaxRetryTimeout, 2 * _fragRetryTimeout);
+            } else if (HLSSettings.fragmentsLoadStrict) {
+                // stop loading
+                _timer.stop()
+                // dispatch error event
+                var isPaused: Boolean = _hls.playbackState !== HLSPlayStates.PLAYING && _hls.playbackState !== HLSPlayStates.PLAYING_BUFFERING,
+                    httpError: Object = event ? { code: _fragLoadStatus, message: event.text } : null,
+                    hasLoadedFragments: Boolean = _hls.stream.bufferLength && _hls.playbackState !== HLSPlayStates.PLAYING_BUFFERING && _hls.playbackState !== HLSPlayStates.PAUSED_BUFFERING,
+                    hlsFragmentLoadError:HLSFragmentLoadError = new HLSFragmentLoadError(isPaused, _fragCurrent.seqnum, _fragCurrent.level, httpError, _fragRetryCount, hasLoadedFragments);
+                _hls.dispatchEvent(new HLSEvent(HLSEvent.FRAGMENT_LOAD_ERROR, hlsFragmentLoadError));
             } else {
                 var level : Level = _levels[_fragCurrent.level];
                 // if we have redundant streams left for that level, switch to it
@@ -664,7 +735,7 @@ package org.mangui.hls.loader {
                 var hlsError : HLSError = new HLSError(HLSError.FRAGMENT_LOADING_CROSSDOMAIN_ERROR, _fragCurrent.url, txt);
                 _hls.dispatchEvent(new HLSEvent(HLSEvent.ERROR, hlsError));
             } else {
-                _fraghandleIOError("HTTP status:" + _fragLoadStatus + ",msg:" + event.text);
+                _fraghandleIOError("HTTP status:" + _fragLoadStatus + ",msg:" + event.text, event);
             }
         };
 

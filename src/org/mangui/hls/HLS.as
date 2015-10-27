@@ -10,6 +10,7 @@ package org.mangui.hls {
     import flash.net.NetStream;
     import flash.net.URLLoader;
     import flash.net.URLStream;
+
     import org.mangui.hls.constant.HLSSeekStates;
     import org.mangui.hls.controller.AudioTrackController;
     import org.mangui.hls.controller.LevelController;
@@ -299,6 +300,10 @@ package org.mangui.hls {
             if(levels && levels.length) {
                 this.dispatchEvent(new HLSEvent(HLSEvent.LEVEL_SWITCH, startLevel));
             }
+        }
+
+        public function retryLoadFragment (fragmentIndex : int, useCurrentLevel : Boolean, fragmentLevel : int) : void {
+            _hlsNetStream.retryLoadFragment(fragmentIndex, useCurrentLevel, fragmentLevel);
         }
     }
 }

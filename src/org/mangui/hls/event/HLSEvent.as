@@ -2,9 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package org.mangui.hls.event {
-    import org.mangui.hls.model.Level;
 
-    import flash.events.Event;
+import flash.events.Event;
+
+import org.mangui.hls.model.Level;
 
     /** Event fired when an error prevents playback. **/
     public class HLSEvent extends Event {
@@ -28,12 +29,14 @@ package org.mangui.hls.event {
         public static const FRAGMENT_LOADING : String = "hlsEventFragmentLoading";
         /** Identifier for a fragment loaded event. **/
         public static const FRAGMENT_LOADED : String = "hlsEventFragmentLoaded";
-        /* Identifier for fragment load aborting for emergency switch down */
+        /** Identifier for fragment load aborting for emergency switch down **/
         public static const FRAGMENT_LOAD_EMERGENCY_ABORTED : String = "hlsEventFragmentLoadEmergencyAborted";
         /** Identifier for a fragment playing event. **/
         public static const FRAGMENT_PLAYING : String = "hlsEventFragmentPlaying";
         /** Identifier for a fragment skipping event. **/
         public static const FRAGMENT_SKIPPED : String = "hlsEventFragmentSkipped";
+        /** Identifier for a fragment load error event. **/
+        public static const FRAGMENT_LOAD_ERROR : String = "hlsFragmentLoadError";
         /** Identifier for a audio tracks list change **/
         public static const AUDIO_TRACKS_LIST_CHANGE : String = "audioTracksListChange";
         /** Identifier for a audio track switch **/
@@ -83,6 +86,8 @@ package org.mangui.hls.event {
         public var levels : Vector.<Level>;
         /** The error message. **/
         public var error : HLSError;
+        /** The fragmentLoadError message. **/
+        public var fragmentLoadError : HLSFragmentLoadError;
         /** Load Metrics. **/
         public var loadMetrics : HLSLoadMetrics;
         /** Play Metrics. **/
@@ -104,6 +109,9 @@ package org.mangui.hls.event {
                 case MANIFEST_LOADING:
                 case FRAGMENT_LOADING:
                     url = parameter as String;
+                    break;
+                case FRAGMENT_LOAD_ERROR:
+                    fragmentLoadError = parameter as HLSFragmentLoadError;
                     break;
                 case ERROR:
                     error = parameter as HLSError;

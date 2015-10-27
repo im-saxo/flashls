@@ -309,6 +309,10 @@ package org.mangui.hls.stream {
             }
         }
 
+        public function retryLoadFragment (fragmentIndex : int, useCurrentLevel : Boolean, fragmentLevel : int) : void {
+            _fragmentLoader.retryLoadFragment(fragmentIndex, useCurrentLevel, fragmentLevel);
+        }
+
         /** Return current media position **/
         public function get position() : Number {
             switch(_hls.seekState) {

@@ -20,6 +20,7 @@ package org.mangui.chromeless {
     import org.mangui.hls.HLSSettings;
     import org.mangui.hls.event.HLSError;
     import org.mangui.hls.event.HLSEvent;
+    import org.mangui.hls.event.HLSFragmentLoadError;
     import org.mangui.hls.model.AudioTrack;
     import org.mangui.hls.model.Level;
     import org.mangui.hls.utils.JSURLLoader;
@@ -110,6 +111,7 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("getFragmentLoadSkipAfterMaxRetry", _getFragmentLoadSkipAfterMaxRetry);
             ExternalInterface.addCallback("getStats", _getStats);
             ExternalInterface.addCallback("getBandwidthLoadDelay", _getBandwidthLoadDelay);
+            ExternalInterface.addCallback("getFragmentsLoadStrict", _getFragmentsLoadStrict);
         };
 
         protected function _setupExternalCallers() : void {
@@ -120,6 +122,7 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerSeek", _seek);
             ExternalInterface.addCallback("playerStop", _stop);
             ExternalInterface.addCallback("playerVolume", _volume);
+            ExternalInterface.addCallback("playerRetryLoadFragment", _retryLoadFragment);
             ExternalInterface.addCallback("playerSetCurrentLevel", _setCurrentLevel);
             ExternalInterface.addCallback("playerSetNextLevel", _setNextLevel);
             ExternalInterface.addCallback("playerSetLoadLevel", _setLoadLevel);
@@ -149,6 +152,7 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerSetKeyLoadMaxRetry", _setKeyLoadMaxRetry);
             ExternalInterface.addCallback("playerSetFragmentLoadSkipAfterMaxRetry", _setFragmentLoadSkipAfterMaxRetry);
             ExternalInterface.addCallback("playerSetBandwidthLoadDelay", _setBandwidthLoadDelay);
+            ExternalInterface.addCallback("playerSetFragmentsLoadStrict", _setFragmentsLoadStrict);
         };
 
         protected function _setupExternalCallback() : void {
@@ -195,6 +199,18 @@ package org.mangui.chromeless {
         protected function _errorHandler(event : HLSEvent) : void {
             var hlsError : HLSError = event.error;
             _trigger("error", hlsError.code, hlsError.url, hlsError.msg);
+        };
+
+        protected function _fragmentLoadErrorHandler(event : HLSEvent) : void {
+            var error : HLSFragmentLoadError = event.fragmentLoadError;
+            _trigger("fragmentLoadError", {
+                paused: error.paused,
+                fragmentIndex: error.fragmentIndex,
+                fragmentLevel: error.fragmentLevel,
+                httpError: error.httpError,
+                retryCount: error.retryCount,
+                hasLoadedFragments: error.hasLoadedFragments
+            });
         };
 
         protected function _levelLoadedHandler(event : HLSEvent) : void {
@@ -448,6 +464,10 @@ package org.mangui.chromeless {
             return HLSSettings.bandwidthLoadDelay;
         };
 
+        protected function _getFragmentsLoadStrict() : Boolean {
+            return HLSSettings.fragmentsLoadStrict;
+        };
+
         /** Javascript calls. **/
         protected function _load(url : String) : void {
             _hls.load(url);
@@ -475,6 +495,12 @@ package org.mangui.chromeless {
 
         protected function _volume(percent : Number) : void {
             _hls.stream.soundTransform = new SoundTransform(percent / 100);
+        };
+
+        protected function _retryLoadFragment(fragmentIndex : int, fragmentLevel : Object) : void {
+            var level: int = int(fragmentLevel),
+                useCurrentLevel: Boolean = fragmentLevel === null;
+            _hls.retryLoadFragment(fragmentIndex, useCurrentLevel, level);
         };
 
         protected function _setCurrentLevel(level : int) : void {
@@ -585,6 +611,10 @@ package org.mangui.chromeless {
             HLSSettings.bandwidthLoadDelay = value;
         };
 
+        protected function _setFragmentsLoadStrict(value : Boolean) : void {
+            HLSSettings.fragmentsLoadStrict = value;
+        };
+
         protected function _setJSURLStream(jsURLstream : Boolean) : void {
             if (jsURLstream) {
                 _hls.URLstream = JSURLStream as Class;
@@ -623,6 +653,7 @@ package org.mangui.chromeless {
             _hls.stage = stage;
             _hls.addEventListener(HLSEvent.PLAYBACK_COMPLETE, _completeHandler);
             _hls.addEventListener(HLSEvent.ERROR, _errorHandler);
+            _hls.addEventListener(HLSEvent.FRAGMENT_LOAD_ERROR, _fragmentLoadErrorHandler);
             _hls.addEventListener(HLSEvent.FRAGMENT_LOADED, _fragmentLoadedHandler);
             _hls.addEventListener(HLSEvent.AUDIO_LEVEL_LOADED, _audioLevelLoadedHandler);
             _hls.addEventListener(HLSEvent.LEVEL_LOADED, _levelLoadedHandler);
