@@ -734,6 +734,25 @@ package org.mangui.hls.loader {
                 var txt : String = "Cannot load fragment: crossdomain access denied:" + event.text;
                 var hlsError : HLSError = new HLSError(HLSError.FRAGMENT_LOADING_CROSSDOMAIN_ERROR, _fragCurrent.url, txt);
                 _hls.dispatchEvent(new HLSEvent(HLSEvent.ERROR, hlsError));
+            } else if (HLSSettings.check415Error && _fragLoadStatus == 415) {
+                // server cannot convert video in given quality, try to requce quality
+                var level:int = _fragCurrent.level;
+                if (level == 0) {
+                    CONFIG::LOGGING {
+                        Log.error("loading fragment check415Error throw error");
+                    }
+                    // this is the worst level, throw error
+                    var error : HLSError = new HLSError(HLSError.FRAGMENT_LOADING_ERROR, _fragCurrent.url, "HTTP status: 415, level: 0");
+                    _hls.dispatchEvent(new HLSEvent(HLSEvent.ERROR, error));
+                }
+                else {
+                    CONFIG::LOGGING {
+                        Log.warn("loading fragment check415Error switch to: " + (level - 1));
+                    }
+                    _levelNext = level - 1;
+                    _loadingState = LOADING_IDLE
+                    _hls.dispatchEvent(new HLSEvent(HLSEvent.LEVEL_SWITCH, level - 1));
+                }
             } else {
                 _fraghandleIOError("HTTP status:" + _fragLoadStatus + ",msg:" + event.text, event);
             }

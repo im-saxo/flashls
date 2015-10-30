@@ -429,5 +429,15 @@ package org.mangui.hls {
          * Default is false
          */
         public static var fragmentsLoadStrict  : Boolean = false;
+
+        /**
+         * check415Error
+         *
+         * Whether to check for HTTP status 415 on fragment load error. If server returns 415 status code,
+         * player must switch to lower quality or throw an error if the quality is the lowest.
+         *
+         * Default is false
+         */
+        public static var check415Error  : Boolean = false;
     }
 }

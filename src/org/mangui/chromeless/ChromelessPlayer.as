@@ -112,6 +112,7 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("getStats", _getStats);
             ExternalInterface.addCallback("getBandwidthLoadDelay", _getBandwidthLoadDelay);
             ExternalInterface.addCallback("getFragmentsLoadStrict", _getFragmentsLoadStrict);
+            ExternalInterface.addCallback("getCheck415Error", _getCheck415Error);
         };
 
         protected function _setupExternalCallers() : void {
@@ -153,6 +154,7 @@ package org.mangui.chromeless {
             ExternalInterface.addCallback("playerSetFragmentLoadSkipAfterMaxRetry", _setFragmentLoadSkipAfterMaxRetry);
             ExternalInterface.addCallback("playerSetBandwidthLoadDelay", _setBandwidthLoadDelay);
             ExternalInterface.addCallback("playerSetFragmentsLoadStrict", _setFragmentsLoadStrict);
+            ExternalInterface.addCallback("playerSetCheck415Error", _setCheck415Error);
         };
 
         protected function _setupExternalCallback() : void {
@@ -468,6 +470,10 @@ package org.mangui.chromeless {
             return HLSSettings.fragmentsLoadStrict;
         };
 
+        protected function _getCheck415Error() : Boolean {
+            return HLSSettings.check415Error;
+        };
+
         /** Javascript calls. **/
         protected function _load(url : String) : void {
             _hls.load(url);
@@ -613,6 +619,10 @@ package org.mangui.chromeless {
 
         protected function _setFragmentsLoadStrict(value : Boolean) : void {
             HLSSettings.fragmentsLoadStrict = value;
+        };
+
+        protected function _setCheck415Error(value : Boolean) : void {
+            HLSSettings.check415Error = value;
         };
 
         protected function _setJSURLStream(jsURLstream : Boolean) : void {
