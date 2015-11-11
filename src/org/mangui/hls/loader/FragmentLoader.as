@@ -349,7 +349,7 @@ package org.mangui.hls.loader {
          */
         public function retryLoadFragment (fragmentIndex : int, useCurrentLevel : Boolean, fragmentLevel : int) : void {
             CONFIG::LOGGING {
-                Log.debug("FragmentLoader: retryLoadFragment: fragmentIndex: " + fragmentIndex + ", fragmentLevel: " + fragmentLevel);
+                Log.debug("FragmentLoader: retryLoadFragment: fragmentIndex: " + fragmentIndex + ", useCurrentLevel: " + useCurrentLevel + ", fragmentLevel: " + fragmentLevel + ", _levelNext: " + _levelNext);
             }
             if (!HLSSettings.fragmentsLoadStrict || !HLSSettings.fragmentLoadMaxRetry) {
                 return;
@@ -380,6 +380,12 @@ package org.mangui.hls.loader {
                     //choose first not-loaded fragment
                     break;
                 }
+            }
+            if (!fragment) {
+                // no fragment on this level
+                var error : HLSError = new HLSError(HLSError.FRAGMENT_LOADING_ERROR, _fragCurrent.url, "retryLoadFragment: fragment " + fragmentIndex + " not found on level " + desiredLevel);
+                _hls.dispatchEvent(new HLSEvent(HLSEvent.ERROR, error));
+                return;
             }
             if (fragment.data.bytes != null) {
                 // this is the last fragment and it is loaded
@@ -576,9 +582,6 @@ package org.mangui.hls.loader {
 
         /** frag load completed. **/
         private function _fragLoadCompleteHandler(event : Event) : void {
-            // load complete, reset retry counter
-            _fragRetryCount = 0;
-            _fragRetryTimeout = 1000;
             var fragData : FragmentData = _fragCurrent.data;
             if (fragData.bytes == null) {
                 CONFIG::LOGGING {
@@ -685,6 +688,10 @@ package org.mangui.hls.loader {
             }
             fragData.bytes = null;
             _demux.notifycomplete();
+
+            // load complete, reset retry counter
+            _fragRetryCount = 0;
+            _fragRetryTimeout = 1000;
         }
 
         /** stop loading fragment **/
@@ -750,7 +757,7 @@ package org.mangui.hls.loader {
                         Log.warn("loading fragment check415Error switch to: " + (level - 1));
                     }
                     _levelNext = level - 1;
-                    _loadingState = LOADING_IDLE
+                    _loadingState = LOADING_IDLE;
                     _hls.dispatchEvent(new HLSEvent(HLSEvent.LEVEL_SWITCH, level - 1));
                 }
             } else {

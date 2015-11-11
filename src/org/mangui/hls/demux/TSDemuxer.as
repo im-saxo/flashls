@@ -2,16 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package org.mangui.hls.demux {
+    import by.blooddy.crypto.Base64;
+    
     import flash.events.Event;
     import flash.events.EventDispatcher;
     import flash.events.TimerEvent;
     import flash.net.ObjectEncoding;
     import flash.utils.ByteArray;
-    import flash.utils.getTimer;
     import flash.utils.Timer;
+    import flash.utils.getTimer;
+    
     import org.mangui.hls.flv.FLVTag;
     import org.mangui.hls.model.AudioTrack;
-    import by.blooddy.crypto.Base64;
 
     CONFIG::LOGGING {
         import org.mangui.hls.utils.Log;
@@ -723,7 +725,7 @@ package org.mangui.hls.demux {
                     }
                     data.position = pos_end + 1;
                 } else {
-                    if(_callback_error) {
+                    if(Boolean(_callback_error)) {
                         _callback_error("TS: Could not parse file: sync byte not found @ offset/len " + data.position + "/" + data.length);
                         return;
                     }
