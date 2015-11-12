@@ -482,6 +482,7 @@ package org.mangui.hls.loader {
                 }
                 /* exponential increase of retry timeout, capped to fragmentLoadMaxRetryTimeout */
                 _fragRetryCount++;
+                _fragCurrent.retry_count_total++;
                 _fragRetryTimeout = Math.min(HLSSettings.fragmentLoadMaxRetryTimeout, 2 * _fragRetryTimeout);
             } else if (HLSSettings.fragmentsLoadStrict) {
                 // stop loading
@@ -490,7 +491,7 @@ package org.mangui.hls.loader {
                 var isPaused: Boolean = _hls.playbackState !== HLSPlayStates.PLAYING && _hls.playbackState !== HLSPlayStates.PLAYING_BUFFERING,
                     httpError: Object = event ? { code: _fragLoadStatus, message: event.text } : null,
                     hasLoadedFragments: Boolean = _hls.stream.bufferLength && _hls.playbackState !== HLSPlayStates.PLAYING_BUFFERING && _hls.playbackState !== HLSPlayStates.PAUSED_BUFFERING,
-                    hlsFragmentLoadError:HLSFragmentLoadError = new HLSFragmentLoadError(isPaused, _fragCurrent.seqnum, _fragCurrent.level, httpError, _fragRetryCount, hasLoadedFragments);
+                    hlsFragmentLoadError:HLSFragmentLoadError = new HLSFragmentLoadError(isPaused, _fragCurrent.seqnum, _fragCurrent.level, httpError, _fragCurrent.retry_count_total, hasLoadedFragments);
                 _hls.dispatchEvent(new HLSEvent(HLSEvent.FRAGMENT_LOAD_ERROR, hlsFragmentLoadError));
             } else {
                 var level : Level = _levels[_fragCurrent.level];
@@ -517,6 +518,7 @@ package org.mangui.hls.loader {
                         }
                         /* exponential increase of retry timeout, capped to fragmentLoadMaxRetryTimeout */
                         _fragRetryCount++;
+                        _fragCurrent.retry_count_total++;
                         _fragRetryTimeout = Math.min(HLSSettings.fragmentLoadMaxRetryTimeout, 2 * _fragRetryTimeout);
                     } else {
                         CONFIG::LOGGING {

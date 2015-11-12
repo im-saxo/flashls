@@ -36,6 +36,8 @@ package org.mangui.hls.model {
         public var data : FragmentData;
         /** custom tags **/
         public var tag_list : Vector.<String>;
+        /** total retry count **/
+        public var retry_count_total : int = 0;
 
         /** Create the fragment. **/
         public function Fragment(url : String, duration : Number, level : int, seqnum : int, start_time : Number, continuity : int, program_date : Number, decrypt_url : String, decrypt_iv : ByteArray, byterange_start_offset : int, byterange_end_offset : int, tag_list : Vector.<String>) {
