@@ -226,6 +226,11 @@ package org.mangui.hls.demux {
             while(data  != null && ((getTimer() - start_time) < 20)) {
                 _parseTSPacket(data);
                 _readPosition+=PACKETSIZE;
+                if( !_timer.running ) {
+                    // prevent sereval errors in a row
+                    data = null;
+                    return;
+                }
                 if(data.bytesAvailable < PACKETSIZE) {
                     data = getNextTSBuffer(_readPosition);
                 }

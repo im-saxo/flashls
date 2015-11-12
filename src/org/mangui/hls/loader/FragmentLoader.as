@@ -942,6 +942,11 @@ package org.mangui.hls.loader {
 
         private function _fragParsingErrorHandler(error : String) : void {
             _stop_load();
+            if (HLSSettings.fragmentLoadMaxRetry > 0) {
+                // restore retry count
+                _fragRetryCount = _fragCurrent.retry_count_total % HLSSettings.fragmentLoadMaxRetry || _fragCurrent.retry_count_total;
+                _fragRetryTimeout = Math.min(HLSSettings.fragmentLoadMaxRetryTimeout, Math.pow(2, _fragCurrent.retry_count_total % HLSSettings.fragmentLoadMaxRetry) * 1000);
+            }
             _fraghandleIOError(error);
         }
 
